@@ -1,0 +1,3 @@
+TITLE = "ALPS Rei Frontend"
+WIDTH = 1280
+HEIGHT = 600
