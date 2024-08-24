@@ -1,6 +1,7 @@
 import cv2
 import datetime
 import tkinter
+import ReiCommon
 import ReiConfig
 import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
@@ -29,7 +30,6 @@ class Application(tkinter.Frame):
         self.image_bgr = self.draw_text(self.image_bgr, str(now_count).rjust(2), 110, 535, self.font, (0, 0, 0))
         self.image_bgr = self.draw_text(self.image_bgr, str(now_price).rjust(5), 645, 535, self.font, (0, 0, 0))
         # 合計
-        self.image_bgr = self.draw_text(self.image_bgr, "いらっしゃいませ", 35, 440, self.font, (0, 0, 0))
         total_count = 1
         total_price = 200
         self.image_bgr = self.draw_text(self.image_bgr, str(total_count).rjust(5), 1100, 436, self.font, (0, 0, 0))
@@ -51,5 +51,10 @@ class Application(tkinter.Frame):
         self.font_clock = ImageFont.truetype("./assets/Kosugi-Regular.ttf", 18)
         self.font = ImageFont.truetype("./assets/Kosugi-Regular.ttf", 42)
         self.image_main = cv2.imread("./assets/main.png")
+        self.items = []
+        with open("./items.csv", encoding = "utf-8") as f:
+            for line in f:
+                line_array = line.split(",")
+                self.items.append(ReiCommon.Item(line_array[0], int(line_array[1]), 1))
         self.loop()
         self.master.mainloop()
