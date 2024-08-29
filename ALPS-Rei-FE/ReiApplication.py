@@ -24,24 +24,23 @@ class Application(tkinter.Frame):
         # 日時
         self.image_bgr = self.draw_text(self.image_bgr, now.strftime("%Y/%m/%d %H:%M:%S"), 20, 5, self.font_clock, (255, 255, 255))
         # 小計
-        self.image_bgr = self.draw_text(self.image_bgr, "いらっしゃいませ", 35, 440, self.font, (0, 0, 0))
-        now_count = 1
-        now_price = 200
-        self.image_bgr = self.draw_text(self.image_bgr, str(now_count).rjust(2), 110, 535, self.font, (0, 0, 0))
-        self.image_bgr = self.draw_text(self.image_bgr, str(now_price).rjust(5), 645, 535, self.font, (0, 0, 0))
-        # 合計
-        total_count = 1
-        total_price = 200
-        self.image_bgr = self.draw_text(self.image_bgr, str(total_count).rjust(5), 1100, 436, self.font, (0, 0, 0))
-        self.image_bgr = self.draw_text(self.image_bgr, str(total_price).rjust(5), 1100, 482, self.font, (0, 0, 0))
+        if len(self.cart) >= 1:
+            self.image_bgr = self.draw_text(self.image_bgr, self.cart[len(self.cart) - 1].name, 35, 440, self.font, (0, 0, 0))
+            self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[len(self.cart) - 1].quantity).rjust(2), 110, 535, self.font, (0, 0, 0))
+            self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[len(self.cart) - 1].price * self.cart[len(self.cart) - 1].quantity).rjust(5), 645, 535, self.font, (0, 0, 0))
         # 購入リスト
+        total_count = 0
+        total_price = 0
         for i in range(len(self.cart)):
             self.image_bgr = self.draw_text(self.image_bgr, str(i + 1), 25, 132 + i * 32, self.font_table, (0, 0, 0))
             self.image_bgr = self.draw_text(self.image_bgr, self.cart[i].name, 145, 132 + i * 32, self.font_table, (0, 0, 0))
-            self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[i].quantity).rjust(2
-            ), 530, 132 + i * 32, self.font_table, (0, 0, 0))
+            self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[i].quantity).rjust(2), 530, 132 + i * 32, self.font_table, (0, 0, 0))
             self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[i].price).rjust(4), 615, 132 + i * 32, self.font_table, (0, 0, 0))
             self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[i].price * self.cart[i].quantity).rjust(5), 735, 132 + i * 32, self.font_table, (0, 0, 0))
+            total_count += self.cart[i].quantity
+            total_price += self.cart[i].price * self.cart[i].quantity
+        self.image_bgr = self.draw_text(self.image_bgr, str(total_count).rjust(5), 1100, 436, self.font, (0, 0, 0))
+        self.image_bgr = self.draw_text(self.image_bgr, str(total_price).rjust(5), 1100, 482, self.font, (0, 0, 0))
         # 商品リスト
         for i in range(len(self.items)):
             self.image_bgr[101 + i * 44:147 + i * 44, 815:1255] = self.image_item
@@ -64,7 +63,10 @@ class Application(tkinter.Frame):
                     for j in range(len(self.cart)):
                         if self.cart[j].name == self.items[i].name:
                             self.cart[j].quantity += 1
+                            self.cart.append(self.cart[j])
+                            del self.cart[j]
                             hit = True
+                            break
                     if hit == False:
                         self.cart.append(self.items[i])
     
