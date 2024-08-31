@@ -41,11 +41,18 @@ class Application(tkinter.Frame):
             total_price += self.cart[i].price * self.cart[i].quantity
         self.image_bgr = self.draw_text(self.image_bgr, str(total_count).rjust(5), 1100, 436, self.font, (0, 0, 0))
         self.image_bgr = self.draw_text(self.image_bgr, str(total_price).rjust(5), 1100, 482, self.font, (0, 0, 0))
-        # 商品リスト
-        for i in range(len(self.items)):
-            self.image_bgr[101 + i * 44:147 + i * 44, 815:1255] = self.image_item
-            self.image_bgr = self.draw_text(self.image_bgr, self.items[i].name, 865, 112 + i * 44, self.font_table, (0, 0, 0))
-            self.image_bgr = self.draw_text(self.image_bgr, self.keymap[i].full, 1215, 112 + i * 44, self.font_table, (0, 0, 0))
+        if self.mode == 0:
+            # 商品リスト
+            for i in range(len(self.items)):
+                self.image_bgr[101 + i * 44:147 + i * 44, 815:1255] = self.image_item
+                self.image_bgr = self.draw_text(self.image_bgr, self.items[i].name, 865, 112 + i * 44, self.font_table, (0, 0, 0))
+                self.image_bgr = self.draw_text(self.image_bgr, self.keymap[i].full, 1215, 112 + i * 44, self.font_table, (0, 0, 0))
+        if self.mode == 1:
+            # 決済手段リスト
+            for i in range(len(self.payment)):
+                self.image_bgr[101 + i * 44:147 + i * 44, 815:1255] = self.image_item
+                self.image_bgr = self.draw_text(self.image_bgr, self.payment[i], 865, 112 + i * 44, self.font_table, (0, 0, 0))
+                self.image_bgr = self.draw_text(self.image_bgr, self.keymap2[i].full, 1215, 112 + i * 44, self.font_table, (0, 0, 0))
         # ウインドウに転送
         self.image_rgb = cv2.cvtColor(self.image_bgr, cv2.COLOR_BGR2RGB)
         self.image_pil = Image.fromarray(self.image_rgb)
@@ -54,21 +61,28 @@ class Application(tkinter.Frame):
         self.after(100, self.loop)
     
     def key_event(self, e):
-        if e.keysym == "Escape":
-            self.cart.clear()
-        else:
-            for i in range(len(self.items)):
-                if e.keysym == self.keymap[i].half:
-                    hit = False
-                    for j in range(len(self.cart)):
-                        if self.cart[j].name == self.items[i].name:
-                            self.cart[j].quantity += 1
-                            self.cart.append(self.cart[j])
-                            del self.cart[j]
-                            hit = True
-                            break
-                    if hit == False:
-                        self.cart.append(self.items[i])
+        if self.mode == 0:
+            if e.keysym == "Escape":
+                self.cart.clear()
+            elif e.keysym == "space":
+                self.mode = 1
+            else:
+                for i in range(len(self.items)):
+                    if e.keysym == self.keymap[i].half:
+                        hit = False
+                        for j in range(len(self.cart)):
+                            if self.cart[j].name == self.items[i].name:
+                                self.cart[j].quantity += 1
+                                self.cart.append(self.cart[j])
+                                del self.cart[j]
+                                hit = True
+                                break
+                        if hit == False:
+                            self.cart.append(self.items[i])
+                            self.cart[len(self.cart) - 1].quantity = 1
+        elif self.mode == 1:
+            if e.keysym == "Escape":
+                self.mode = 0
     
     def __init__(self, master = None):
         super().__init__(master)
@@ -91,12 +105,27 @@ class Application(tkinter.Frame):
             ReiCommon.Key("Ｙ", "y"),
             ReiCommon.Key("Ｕ", "u")
         ]
+        self.keymap2 = [
+            ReiCommon.Key("Ａ", "a"),
+            ReiCommon.Key("Ｓ", "s"),
+            ReiCommon.Key("Ｄ", "d"),
+            ReiCommon.Key("Ｆ", "f"),
+            ReiCommon.Key("Ｇ", "g"),
+            ReiCommon.Key("Ｈ", "h"),
+            ReiCommon.Key("Ｊ", "j")
+        ]
         self.items = []
         self.cart = []
+        self.payment = []
+        self.mode = 0
         with open("./items.csv", encoding = "utf-8") as f:
             for line in f:
                 line_array = line.split(",")
                 self.items.append(ReiCommon.Item(line_array[0], int(line_array[1]), 1))
+        with open("./payment.csv", encoding = "utf-8") as f:
+            for line in f:
+                line_array = line.split(",")
+                self.payment.append(line_array[0])
         self.master.bind("<KeyPress>", self.key_event)
         self.loop()
         self.master.mainloop()
