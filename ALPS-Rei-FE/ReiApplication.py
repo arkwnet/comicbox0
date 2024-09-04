@@ -20,7 +20,10 @@ class Application(tkinter.Frame):
         now = datetime.datetime.now(timezone)
         # 背景画像
         self.image_bgr = 255 * np.ones((ReiConfig.HEIGHT, ReiConfig.WIDTH, 3), np.uint8)
-        self.image_bgr[0:ReiConfig.HEIGHT, 0:ReiConfig.WIDTH] = self.image_main
+        if self.mode == 0:
+            self.image_bgr[0:ReiConfig.HEIGHT, 0:ReiConfig.WIDTH] = self.image_main
+        elif self.mode == 1:
+            self.image_bgr[0:ReiConfig.HEIGHT, 0:ReiConfig.WIDTH] = self.image_payment
         # 日時
         self.image_bgr = self.draw_text(self.image_bgr, now.strftime("%Y/%m/%d %H:%M:%S"), 20, 5, self.font_clock, (255, 255, 255))
         # 小計
@@ -95,6 +98,7 @@ class Application(tkinter.Frame):
         self.font_table = ImageFont.truetype("./assets/Kosugi-Regular.ttf", 22)
         self.font = ImageFont.truetype("./assets/Kosugi-Regular.ttf", 42)
         self.image_main = cv2.imread("./assets/main.png")
+        self.image_payment = cv2.imread("./assets/payment.png")
         self.image_item = cv2.imread("./assets/item.png")
         self.keymap = [
             ReiCommon.Key("Ｑ", "q"),
