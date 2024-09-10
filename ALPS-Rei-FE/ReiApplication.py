@@ -1,10 +1,13 @@
 import cv2
 import datetime
+import time
 import tkinter
 import ReiCommon
 import ReiConfig
 import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
+from escpos.printer import Usb
+from escpos import *
 
 class Application(tkinter.Frame):
     def draw_text(self, img, text, x, y, font, color):
@@ -27,10 +30,14 @@ class Application(tkinter.Frame):
         # 日時
         self.image_bgr = self.draw_text(self.image_bgr, now.strftime("%Y/%m/%d %H:%M:%S"), 20, 5, self.font_clock, (255, 255, 255))
         # 小計
-        if len(self.cart) >= 1:
-            self.image_bgr = self.draw_text(self.image_bgr, self.cart[len(self.cart) - 1].name, 35, 440, self.font, (0, 0, 0))
-            self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[len(self.cart) - 1].quantity).rjust(2), 110, 535, self.font, (0, 0, 0))
-            self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[len(self.cart) - 1].price * self.cart[len(self.cart) - 1].quantity).rjust(5), 645, 535, self.font, (0, 0, 0))
+        if self.mode == 0:
+            if len(self.cart) >= 1:
+                self.image_bgr = self.draw_text(self.image_bgr, self.cart[len(self.cart) - 1].name, 35, 440, self.font, (0, 0, 0))
+                self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[len(self.cart) - 1].quantity).rjust(2), 110, 535, self.font, (0, 0, 0))
+                self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[len(self.cart) - 1].price * self.cart[len(self.cart) - 1].quantity).rjust(5), 645, 535, self.font, (0, 0, 0))
+        elif self.mode == 1:
+            self.image_bgr = self.draw_text(self.image_bgr, "決済手段とお預かり金額を入力", 35, 440, self.font, (0, 0, 0))
+            self.image_bgr = self.draw_text(self.image_bgr, str(12345).rjust(5), 645, 535, self.font, (0, 0, 0))
         # 購入リスト
         total_count = 0
         total_price = 0
@@ -52,9 +59,9 @@ class Application(tkinter.Frame):
                 self.image_bgr = self.draw_text(self.image_bgr, self.keymap[i].full, 1215, 112 + i * 44, self.font_table, (0, 0, 0))
         if self.mode == 1:
             # 決済手段リスト
-            for i in range(len(self.payment)):
+            for i in range(len(self.method)):
                 self.image_bgr[101 + i * 44:147 + i * 44, 815:1255] = self.image_item
-                self.image_bgr = self.draw_text(self.image_bgr, self.payment[i], 865, 112 + i * 44, self.font_table, (0, 0, 0))
+                self.image_bgr = self.draw_text(self.image_bgr, self.method[i], 865, 112 + i * 44, self.font_table, (0, 0, 0))
                 self.image_bgr = self.draw_text(self.image_bgr, self.keymap2[i].full, 1215, 112 + i * 44, self.font_table, (0, 0, 0))
         # ウインドウに転送
         self.image_rgb = cv2.cvtColor(self.image_bgr, cv2.COLOR_BGR2RGB)
@@ -86,6 +93,17 @@ class Application(tkinter.Frame):
         elif self.mode == 1:
             if e.keysym == "Escape":
                 self.mode = 0
+            else:
+                for i in range(len(self.method)):
+                    if e.keysym == self.keymap2[i].half:
+                        image = Image.open("./assets/test.png")
+                        p = Usb(0x0416, 0x5011, 0, 0x81, 0x03)
+                        time.sleep(1)
+                        p.image(image)
+                        p.cut()
+                        self.cart.clear()
+                        self.mode = 0
+                        break
     
     def __init__(self, master = None):
         super().__init__(master)
@@ -120,7 +138,8 @@ class Application(tkinter.Frame):
         ]
         self.items = []
         self.cart = []
-        self.payment = []
+        self.payment = ReiCommon.Payment("", "", "", 0, 0, 0)
+        self.method = []
         self.mode = 0
         with open("./items.csv", encoding = "utf-8") as f:
             for line in f:
@@ -129,7 +148,7 @@ class Application(tkinter.Frame):
         with open("./payment.csv", encoding = "utf-8") as f:
             for line in f:
                 line_array = line.split(",")
-                self.payment.append(line_array[0])
+                self.method.append(line_array[0])
         self.master.bind("<KeyPress>", self.key_event)
         self.loop()
         self.master.mainloop()

@@ -11,6 +11,15 @@ class Item():
         self.price = price
         self.quantity = quantity
 
+class Payment():
+    def __init__(self, id, timestamp, method, total, cash, change):
+        self.id = id
+        self.timestamp = timestamp
+        self.method = method
+        self.total = total
+        self.cash = cash
+        self.change = change
+
 class Key():
     def __init__(self, full, half):
         self.full = full
