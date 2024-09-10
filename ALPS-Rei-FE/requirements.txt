@@ -1,0 +1,6 @@
+libusb
+numpy
+opencv-python
+Pillow
+python-escpos
+pyusb
