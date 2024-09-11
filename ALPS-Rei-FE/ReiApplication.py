@@ -1,13 +1,10 @@
 import cv2
 import datetime
-import time
 import tkinter
 import ReiCommon
 import ReiConfig
 import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
-from escpos.printer import Usb
-from escpos import *
 
 class Application(tkinter.Frame):
     def draw_text(self, img, text, x, y, font, color):
@@ -96,11 +93,6 @@ class Application(tkinter.Frame):
             else:
                 for i in range(len(self.method)):
                     if e.keysym == self.keymap2[i].half:
-                        image = Image.open("./assets/test.png")
-                        p = Usb(0x0416, 0x5011, 0, 0x81, 0x03)
-                        time.sleep(1)
-                        p.image(image)
-                        p.cut()
                         self.cart.clear()
                         self.mode = 0
                         break
