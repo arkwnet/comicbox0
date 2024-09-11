@@ -34,7 +34,7 @@ class Application(tkinter.Frame):
                 self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[len(self.cart) - 1].price * self.cart[len(self.cart) - 1].quantity).rjust(5), 645, 535, self.font, (0, 0, 0))
         elif self.mode == 1:
             self.image_bgr = self.draw_text(self.image_bgr, "決済手段とお預かり金額を入力", 35, 440, self.font, (0, 0, 0))
-            self.image_bgr = self.draw_text(self.image_bgr, str(12345).rjust(5), 645, 535, self.font, (0, 0, 0))
+            self.image_bgr = self.draw_text(self.image_bgr, str(self.payment.cash).rjust(5), 645, 535, self.font, (0, 0, 0))
         # 購入リスト
         total_count = 0
         total_price = 0
@@ -72,6 +72,7 @@ class Application(tkinter.Frame):
             if e.keysym == "Escape":
                 self.cart.clear()
             elif e.keysym == "space":
+                self.payment = ReiCommon.Payment("", "", "", 0, 0, 0)
                 self.mode = 1
             else:
                 for i in range(len(self.items)):
@@ -90,7 +91,14 @@ class Application(tkinter.Frame):
         elif self.mode == 1:
             if e.keysym == "Escape":
                 self.mode = 0
+            elif e.keysym == "BackSpace":
+                self.payment.cash = 0
             else:
+                for i in range(10):
+                    if e.keysym == str(i):
+                        if (len(str(self.payment.cash)) <= 4):
+                            self.payment.cash = int(str(self.payment.cash) + str(i))
+                        break
                 for i in range(len(self.method)):
                     if e.keysym == self.keymap2[i].half:
                         self.cart.clear()
@@ -130,7 +138,7 @@ class Application(tkinter.Frame):
         ]
         self.items = []
         self.cart = []
-        self.payment = ReiCommon.Payment("", "", "", 0, 0, 0)
+        self.payment = None
         self.method = []
         self.mode = 0
         with open("./items.csv", encoding = "utf-8") as f:
