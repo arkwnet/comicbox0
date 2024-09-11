@@ -12,9 +12,7 @@ class Item():
         self.quantity = quantity
 
 class Payment():
-    def __init__(self, id, timestamp, method, total, cash, change):
-        self.id = id
-        self.timestamp = timestamp
+    def __init__(self, method, total, cash, change):
         self.method = method
         self.total = total
         self.cash = cash

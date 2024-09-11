@@ -1,10 +1,15 @@
 import cv2
 import datetime
+import json
+import os
 import tkinter
 import ReiCommon
 import ReiConfig
+import urllib.request
 import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
+from dotenv import load_dotenv
+load_dotenv()
 
 class Application(tkinter.Frame):
     def draw_text(self, img, text, x, y, font, color):
@@ -72,7 +77,10 @@ class Application(tkinter.Frame):
             if e.keysym == "Escape":
                 self.cart.clear()
             elif e.keysym == "space":
-                self.payment = ReiCommon.Payment("", "", "", 0, 0, 0)
+                total = 0
+                for i in range(len(self.cart)):
+                    total += self.cart[i].price * self.cart[i].quantity
+                self.payment = ReiCommon.Payment("", total, 0, 0)
                 self.mode = 1
             else:
                 for i in range(len(self.items)):
@@ -101,9 +109,31 @@ class Application(tkinter.Frame):
                         break
                 for i in range(len(self.method)):
                     if e.keysym == self.keymap2[i].half:
-                        self.cart.clear()
-                        self.mode = 0
-                        break
+                        if self.payment.cash >= self.payment.total:
+                            self.payment.method = self.method[i]
+                            self.payment.change = self.payment.cash - self.payment.total
+                            items = []
+                            for j in range(len(self.cart)):
+                                items.append({
+                                    "name": self.cart[j].name,
+                                    "price": str(self.cart[j].price),
+                                    "quantity": str(self.cart[j].quantity)
+                                })
+                            obj = {
+                                "id": str(0),
+                                "items": items,
+                                "total": str(self.payment.total),
+                                "payment": self.payment.method,
+                                "cash": str(self.payment.cash),
+                                "change": str(self.payment.change)
+                            } 
+                            obj_json = json.dumps(obj).encode("utf-8")
+                            request = urllib.request.Request(os.getenv("BACKEND_URL") + "/record", data = obj_json, method = "POST", headers = {"Content-Type": "application/json"})
+                            with urllib.request.urlopen(request) as response:
+                                response_body = response.read().decode("utf-8")
+                            self.cart.clear()
+                            self.mode = 0
+                            break
     
     def __init__(self, master = None):
         super().__init__(master)
