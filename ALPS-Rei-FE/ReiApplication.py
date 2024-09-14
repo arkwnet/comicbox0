@@ -129,7 +129,7 @@ class Application(tkinter.Frame):
                                 "change": str(self.payment.change)
                             } 
                             obj_json = json.dumps(obj).encode("utf-8")
-                            request = urllib.request.Request(os.getenv("BACKEND_URL") + "/record", data = obj_json, method = "POST", headers = {"Content-Type": "application/json"})
+                            request = urllib.request.Request(os.getenv("BACKEND_URL") + "/record", data = obj_json, method = "POST", headers = {"Content-Type": "application/json", "User-Agent": "mozilla/5.0"})
                             with urllib.request.urlopen(request) as response:
                                 response_body = response.read().decode("utf-8")
                             with open("./receipt.json", "wt", encoding = "utf-8") as f:
