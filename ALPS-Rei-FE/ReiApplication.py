@@ -119,8 +119,9 @@ class Application(tkinter.Frame):
                                     "price": str(self.cart[j].price),
                                     "quantity": str(self.cart[j].quantity)
                                 })
+                            self.id += 1
                             obj = {
-                                "id": str(0),
+                                "id": str(self.id),
                                 "items": items,
                                 "total": str(self.payment.total),
                                 "payment": self.payment.method,
@@ -133,6 +134,8 @@ class Application(tkinter.Frame):
                                 response_body = response.read().decode("utf-8")
                             with open("./receipt.json", "wt", encoding = "utf-8") as f:
                                 json.dump(obj, f, indent = 2, ensure_ascii = False)
+                            with open("./id", "w", encoding = "utf-8") as f:
+                                f.write(str(self.id))
                             self.cart.clear()
                             self.mode = 0
                             break
@@ -168,6 +171,10 @@ class Application(tkinter.Frame):
             ReiCommon.Key("Ｈ", "h"),
             ReiCommon.Key("Ｊ", "j")
         ]
+        self.id = 0
+        if os.path.isfile("./id"):
+            with open("./id", encoding = "utf-8") as f:
+                self.id = int(f.read())
         self.items = []
         self.cart = []
         self.payment = None
