@@ -131,6 +131,8 @@ class Application(tkinter.Frame):
                             request = urllib.request.Request(os.getenv("BACKEND_URL") + "/record", data = obj_json, method = "POST", headers = {"Content-Type": "application/json"})
                             with urllib.request.urlopen(request) as response:
                                 response_body = response.read().decode("utf-8")
+                            with open("./receipt.json", "wt", encoding = "utf-8") as f:
+                                json.dump(obj, f, indent = 2, ensure_ascii = False)
                             self.cart.clear()
                             self.mode = 0
                             break
