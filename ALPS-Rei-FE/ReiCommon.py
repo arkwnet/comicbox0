@@ -1,9 +1,28 @@
+import json
+
 class Display():
-    def __init__(self, upper_left, upper_right, lower_left, lower_right):
+    def __init__(self):
+        self.upper_left = ""
+        self.upper_right = ""
+        self.lower_left = ""
+        self.lower_right = ""
+        
+    def clear(self):
+        self.update("", "", "", "")
+    
+    def update(self, upper_left, upper_right, lower_left, lower_right):
         self.upper_left = upper_left
         self.upper_right = upper_right
         self.lower_left = lower_left
         self.lower_right = lower_right
+        obj = {
+            "upper_left": self.upper_left,
+            "upper_right": self.upper_right,
+            "lower_left": self.lower_left,
+            "lower_right": self.lower_right
+        }
+        with open("./display.json", "wt", encoding = "utf-8") as f:
+            json.dump(obj, f, indent = 2, ensure_ascii = False)
 
 class Item():
     def __init__(self, name, price, quantity):

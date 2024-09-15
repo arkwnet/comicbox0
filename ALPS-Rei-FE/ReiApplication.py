@@ -20,6 +20,12 @@ class Application(tkinter.Frame):
         img = np.array(img)
         return img
     
+    def total(self):
+        total = 0
+        for i in range(len(self.cart)):
+            total += self.cart[i].price * self.cart[i].quantity
+        return total
+    
     def loop(self):
         timezone = datetime.timezone(datetime.timedelta(hours = 9), "JST")
         now = datetime.datetime.now(timezone)
@@ -42,7 +48,6 @@ class Application(tkinter.Frame):
             self.image_bgr = self.draw_text(self.image_bgr, str(self.payment.cash).rjust(5), 645, 535, self.font, (0, 0, 0))
         # 購入リスト
         total_count = 0
-        total_price = 0
         for i in range(len(self.cart)):
             self.image_bgr = self.draw_text(self.image_bgr, str(i + 1), 25, 132 + i * 32, self.font_table, (0, 0, 0))
             self.image_bgr = self.draw_text(self.image_bgr, self.cart[i].name, 145, 132 + i * 32, self.font_table, (0, 0, 0))
@@ -50,9 +55,8 @@ class Application(tkinter.Frame):
             self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[i].price).rjust(4), 615, 132 + i * 32, self.font_table, (0, 0, 0))
             self.image_bgr = self.draw_text(self.image_bgr, str(self.cart[i].price * self.cart[i].quantity).rjust(5), 735, 132 + i * 32, self.font_table, (0, 0, 0))
             total_count += self.cart[i].quantity
-            total_price += self.cart[i].price * self.cart[i].quantity
         self.image_bgr = self.draw_text(self.image_bgr, str(total_count).rjust(5), 1100, 436, self.font, (0, 0, 0))
-        self.image_bgr = self.draw_text(self.image_bgr, str(total_price).rjust(5), 1100, 482, self.font, (0, 0, 0))
+        self.image_bgr = self.draw_text(self.image_bgr, str(self.total()).rjust(5), 1100, 482, self.font, (0, 0, 0))
         if self.mode == 0:
             # 商品リスト
             for i in range(len(self.items)):
@@ -76,11 +80,13 @@ class Application(tkinter.Frame):
         if self.mode == 0:
             if e.keysym == "Escape":
                 self.cart.clear()
+                self.display.clear()
             elif e.keysym == "space":
                 total = 0
                 for i in range(len(self.cart)):
                     total += self.cart[i].price * self.cart[i].quantity
-                self.payment = ReiCommon.Payment("", total, 0, 0)
+                self.payment = ReiCommon.Payment("", self.total(), 0, 0)
+                self.display.update("", "", "合計", str(self.payment.total))
                 self.mode = 1
             else:
                 for i in range(len(self.items)):
@@ -91,11 +97,13 @@ class Application(tkinter.Frame):
                                 self.cart[j].quantity += 1
                                 self.cart.append(self.cart[j])
                                 del self.cart[j]
+                                self.display.update(self.cart[len(self.cart) - 1].name, str(self.cart[len(self.cart) - 1].price), "小計", str(self.total()))
                                 hit = True
                                 break
                         if hit == False:
                             self.cart.append(self.items[i])
                             self.cart[len(self.cart) - 1].quantity = 1
+                            self.display.update(self.cart[len(self.cart) - 1].name, str(self.cart[len(self.cart) - 1].price), "小計", str(self.total()))
         elif self.mode == 1:
             if e.keysym == "Escape":
                 self.mode = 0
@@ -127,15 +135,18 @@ class Application(tkinter.Frame):
                                 "payment": self.payment.method,
                                 "cash": str(self.payment.cash),
                                 "change": str(self.payment.change)
-                            } 
+                            }
                             obj_json = json.dumps(obj).encode("utf-8")
                             request = urllib.request.Request(os.getenv("BACKEND_URL") + "/record", data = obj_json, method = "POST", headers = {"Content-Type": "application/json", "User-Agent": "mozilla/5.0"})
                             with urllib.request.urlopen(request) as response:
                                 response_body = response.read().decode("utf-8")
+                            if self.payment.method == "現金":
+                                self.payment.method = "お預かり"
                             with open("./receipt.json", "wt", encoding = "utf-8") as f:
                                 json.dump(obj, f, indent = 2, ensure_ascii = False)
                             with open("./id", "w", encoding = "utf-8") as f:
                                 f.write(str(self.id))
+                            self.display.update(self.payment.method, str(self.payment.cash), "お釣り", str(self.payment.change))
                             self.cart.clear()
                             self.mode = 0
                             break
@@ -175,6 +186,8 @@ class Application(tkinter.Frame):
         if os.path.isfile("./id"):
             with open("./id", encoding = "utf-8") as f:
                 self.id = int(f.read())
+        self.display = ReiCommon.Display()
+        self.display.clear()
         self.items = []
         self.cart = []
         self.payment = None
