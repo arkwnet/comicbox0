@@ -11,7 +11,7 @@ import numpy as np
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 from dotenv import load_dotenv
 load_dotenv()
-logging.basicConfig(filename = "log.txt", encoding = "utf-8", level = logging.DEBUG, format = "%(asctime)s %(levelname)s %(name)s: %(message)s")
+logging.basicConfig(filename = "log.txt", encoding = "utf-8", level = logging.DEBUG)
 
 class Application(tkinter.Frame):
     def draw_text(self, img, text, x, y, font, color):
@@ -129,7 +129,7 @@ class Application(tkinter.Frame):
                                     "price": str(self.cart[j].price),
                                     "quantity": str(self.cart[j].quantity)
                                 })
-                                self.logger.info("[ITEM] name=" + self.cart[j].name + ", price=" + str(self.cart[j].price) + ", quantity=" + str(self.cart[j].quantity))
+                                self.logger.info("[ITEM] timestamp=" + datetime.datetime.now().isoformat() + ", price=" + str(self.cart[j].price) + ", quantity=" + str(self.cart[j].quantity))
                             self.id += 1
                             obj = {
                                 "id": str(self.id),
@@ -150,7 +150,7 @@ class Application(tkinter.Frame):
                             with open("./id", "w", encoding = "utf-8") as f:
                                 f.write(str(self.id))
                             self.display.update(self.payment.method, str(self.payment.cash), "お釣り", str(self.payment.change))
-                            self.logger.info("[PURCHASE] id=" + str(self.id) + ", total=" + str(self.payment.total) + ", payment=" + self.payment.method + ", cash=" + str(self.payment.cash) + ", change=" + str(self.payment.change))
+                            self.logger.info("[PURCHASE] timestamp=" + datetime.datetime.now().isoformat() + ", id=" + str(self.id) + ", total=" + str(self.payment.total) + ", payment=" + self.payment.method + ", cash=" + str(self.payment.cash) + ", change=" + str(self.payment.change))
                             self.cart.clear()
                             self.mode = 0
                             break
@@ -206,7 +206,7 @@ class Application(tkinter.Frame):
                 line_array = line.split(",")
                 self.method.append(line_array[0])
         self.logger = logging.getLogger(__name__)
-        self.logger.info("Starting ALPS-Rei-FE")
+        self.logger.info("[START] timestamp=" + datetime.datetime.now().isoformat())
         self.master.bind("<KeyPress>", self.key_event)
         self.loop()
         self.master.mainloop()
