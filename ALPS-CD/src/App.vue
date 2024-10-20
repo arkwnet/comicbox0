@@ -1,6 +1,6 @@
 <template>
   <div>
-    <canvas class="canvas" ref="canvas" width="1480" height="720" @click="click"></canvas>
+    <canvas class="canvas" ref="canvas" width="1920" height="1200" @click="click"></canvas>
   </div>
 </template>
 
@@ -11,8 +11,8 @@ export default {
     return {
       status: false,
       image: new Image(),
-      imageWidth: 1480,
-      imageHeight: 720,
+      imageWidth: 1920,
+      imageHeight: 1200,
       canvas: null,
       context: null,
       isFullScreen: false
@@ -55,33 +55,33 @@ export default {
         this.context.fillStyle = '#fff'
         await this.context.fillRect(
           0,
-          this.imageHeight / 2 - 60,
+          this.imageHeight / 2 + 180,
           this.imageWidth,
-          this.imageHeight / 2 + 60
+          this.imageHeight / 2 + 300
         )
         this.context.font = '160px sans-serif'
         this.context.fillStyle = '#000'
         this.context.textAlign = 'left'
-        await this.context.fillText(data.upper_left, 30, this.imageHeight / 2 + 118)
-        await this.context.fillText(data.lower_left, 30, this.imageHeight / 2 + 310)
+        await this.context.fillText(data.upper_left, 30, this.imageHeight / 2 + 358)
+        await this.context.fillText(data.lower_left, 30, this.imageHeight / 2 + 550)
         this.context.fillStyle = '#fff'
         await this.context.fillRect(
-          this.imageWidth / 2 + 180,
-          this.imageHeight / 2 - 60,
+          this.imageWidth / 2 + 330,
+          this.imageHeight / 2 + 180,
           this.imageWidth / 2 - 180,
-          this.imageHeight / 2 + 60
+          this.imageHeight / 2 + 300
         )
         this.context.fillStyle = '#000'
         this.context.textAlign = 'right'
         await this.context.fillText(
           data.upper_right,
           this.imageWidth - 30,
-          this.imageHeight / 2 + 118
+          this.imageHeight / 2 + 358
         )
         await this.context.fillText(
           data.lower_right,
           this.imageWidth - 30,
-          this.imageHeight / 2 + 310
+          this.imageHeight / 2 + 550
         )
       }
       const vm = this
